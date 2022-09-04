@@ -181,8 +181,28 @@ func TestTools_UploadOneFile(t *testing.T) {
 	uploadedFilePath := fmt.Sprintf("%s%s", uploadDir, uploadedFile.FileName)
 	// check if the uploaded file actually exists
 	if _, err := os.Stat(uploadedFilePath); os.IsNotExist(err) {
-		t.Errorf("Expected file %s to exist at %s dir", e.name, uploadDir)
+		t.Errorf("Expected file %s to exist at %s dir", uploadedFile.FileName, uploadDir)
 	}
 	// clean up
 	os.Remove(uploadedFilePath)
+}
+
+func TestTools_CreateDirIfNotExist(t *testing.T) {
+	var testTool Tools
+	testdir := "./testdata/testdir"
+
+	// Creating a dir that does not exists
+	err := testTool.CreateDirIfNotExists(testdir)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Following dir already exists, nothing should be done
+	err = testTool.CreateDirIfNotExists(testdir)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Clean up
+	os.Remove(testdir)
 }
