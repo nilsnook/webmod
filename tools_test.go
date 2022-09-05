@@ -118,7 +118,7 @@ func TestTools_UploadFiles(t *testing.T) {
 		}
 
 		// We expect an error, but none received!
-		if !e.errorExpected && err != nil {
+		if e.errorExpected && err == nil {
 			t.Errorf("Expected error, but none received for test -> %s", e.name)
 		}
 
@@ -205,4 +205,61 @@ func TestTools_CreateDirIfNotExist(t *testing.T) {
 
 	// Clean up
 	os.Remove(testdir)
+}
+
+var slugTests = []struct {
+	name          string
+	str           string
+	expected      string
+	errorExpected bool
+}{
+	{
+		name:          "Valid string",
+		str:           "now is the time!",
+		expected:      "now-is-the-time",
+		errorExpected: false,
+	},
+	{
+		name:          "Empty string",
+		str:           "",
+		expected:      "",
+		errorExpected: true,
+	},
+	{
+		name:          "Complex string",
+		str:           "yo! ^now^ is the f**king time. 123... Go!",
+		expected:      "yo-now-is-the-f-king-time-123-go",
+		errorExpected: false,
+	},
+	{
+		name:          "Japanese string",
+		str:           "今がその時だ",
+		expected:      "",
+		errorExpected: true,
+	},
+	{
+		name:          "Japanese string and Roamn characters",
+		str:           "今がその時だ! GO GET THEM-->",
+		expected:      "go-get-them",
+		errorExpected: false,
+	},
+}
+
+func TestTools_Slugify(t *testing.T) {
+	var testTool Tools
+
+	for _, e := range slugTests {
+		slug, err := testTool.Slugify(e.str)
+		if !e.errorExpected && err != nil {
+			t.Errorf("\nTest: %s:\n\tError received when none expected!\nError: %s", e.name, err.Error())
+		}
+
+		if !e.errorExpected && slug != e.expected {
+			t.Errorf("\nTest: %s:\n\tWrong slug returned\nExpected: %s\nReceived: %s", e.name, e.expected, slug)
+		}
+
+		if e.errorExpected && err == nil {
+			t.Errorf("\nTest: %s:\n\tError expected, but none received", e.name)
+		}
+	}
 }
